@@ -44,6 +44,25 @@ describe("frete.calcular", () => {
     }
   });
 
+  it("valida pedágio fixo até 100kg: MG METROPOLITANA -> SP METROPOLITANA, 100kg = R$ 2,49", async () => {
+    const ctx = createTestContext();
+    const caller = appRouter.createCaller(ctx);
+
+    const result = await caller.frete.calcular({
+      ufOrigem: "MG",
+      classificacaoOrigem: "METROPOLITANA",
+      ufDestino: "SP",
+      classificacaoDestino: "METROPOLITANA",
+      peso: 100,
+      valorMercadoria: 2500,
+      produtoQuimico: false,
+      aplicarTDE: false,
+    });
+
+    // Pedágio até 100kg deve ser valor fixo (R$ 2,19 / 0,88 = R$ 2,49)
+    expect(result.pedagio).toBeCloseTo(2.49, 1);
+  });
+
   it("valida o exemplo fornecido: MG METROPOLITANA -> SP CAPITAL, 580kg, R$ 17.500,00 = R$ 440,01", async () => {
     const ctx = createTestContext();
     const caller = appRouter.createCaller(ctx);

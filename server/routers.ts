@@ -115,15 +115,22 @@ export const appRouter = router({
         const despacho = tabela.despacho / ICMS_DIVISOR;
 
         // Calcular Pedágio (usando os campos de prodQuimico da tabela)
-        const pedagioBase = peso <= 100 ? tabela.prodQuimicoAte100 : tabela.prodQuimicoAcima100;
-        const pedagio = (pedagioBase * peso) / ICMS_DIVISOR;
+        // Até 100kg: valor fixo (não multiplica por peso)
+        // Acima de 100kg: valor por kg (multiplica por peso)
+        let pedagio = 0;
+        if (peso <= 100) {
+          pedagio = tabela.prodQuimicoAte100 / ICMS_DIVISOR;
+        } else {
+          pedagio = (tabela.prodQuimicoAcima100 * peso) / ICMS_DIVISOR;
+        }
 
         // Calcular Produto Químico (se aplicável) - NÃO dividir por ICMS
         let produtoQuimicoValor = 0;
         if (produtoQuimico) {
+          const pedagioBaseValue = peso <= 100 ? tabela.prodQuimicoAte100 : tabela.prodQuimicoAcima100;
           produtoQuimicoValor = Math.max(
             (fretePesoBase * tabela.prodQuimicoPerc) / 100,
-            pedagioBase
+            pedagioBaseValue
           );
         }
 
