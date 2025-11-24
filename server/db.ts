@@ -1,6 +1,6 @@
-import { eq } from "drizzle-orm";
+import { eq, and } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { InsertUser, users } from "../drizzle/schema";
+import { InsertUser, users, freteTabela } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
 let _db: ReturnType<typeof drizzle> | null = null;
@@ -89,4 +89,65 @@ export async function getUserByOpenId(openId: string) {
   return result.length > 0 ? result[0] : undefined;
 }
 
-// TODO: add feature queries here as your schema grows.
+/**
+ * Busca a tabela de frete por origem e destino
+ */
+export async function getFreteByOrigemDestino(
+  ufOrigem: string,
+  classificacaoOrigem: string,
+  ufDestino: string,
+  classificacaoDestino: string
+) {
+  const db = await getDb();
+  if (!db) {
+    console.warn("[Database] Cannot get frete: database not available");
+    return undefined;
+  }
+
+  const result = await db
+    .select()
+    .from(freteTabela)
+    .where(
+      and(
+        eq(freteTabela.ufOrigem, ufOrigem),
+        eq(freteTabela.classificacaoOrigem, classificacaoOrigem),
+        eq(freteTabela.ufDestino, ufDestino),
+        eq(freteTabela.classificacaoDestino, classificacaoDestino)
+      )
+    )
+    .limit(1);
+
+  return result.length > 0 ? result[0] : undefined;
+}
+
+/**
+ * Retorna todas as UFs disponíveis na tabela de frete
+ */
+export async function getUFs() {
+  const db = await getDb();
+  if (!db) {
+    console.warn("[Database] Cannot get UFs: database not available");
+    return [];
+  }
+
+  const result = await db.selectDistinct({ uf: freteTabela.ufOrigem }).from(freteTabela);
+  return result.map((r) => r.uf).sort();
+}
+
+/**
+ * Retorna todas as classificações disponíveis para uma UF
+ */
+export async function getClassificacoesByUF(uf: string) {
+  const db = await getDb();
+  if (!db) {
+    console.warn("[Database] Cannot get classificações: database not available");
+    return [];
+  }
+
+  const result = await db
+    .selectDistinct({ classificacao: freteTabela.classificacaoOrigem })
+    .from(freteTabela)
+    .where(eq(freteTabela.ufOrigem, uf));
+  
+  return result.map((r) => r.classificacao).sort();
+}
