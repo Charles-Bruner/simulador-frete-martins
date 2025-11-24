@@ -18,6 +18,7 @@ export default function Home() {
   const [peso, setPeso] = useState("");
   const [valorMercadoria, setValorMercadoria] = useState("");
   const [produtoQuimico, setProdutoQuimico] = useState(false);
+  const [aplicarTDE, setAplicarTDE] = useState(false);
 
   const { data: ufs, isLoading: isLoadingUFs } = trpc.frete.getUFs.useQuery();
   const { data: classificacoesOrigem, isLoading: isLoadingClassOrigem } = trpc.frete.getClassificacoes.useQuery(
@@ -65,6 +66,7 @@ export default function Home() {
       peso: pesoNum,
       valorMercadoria: valorNum,
       produtoQuimico,
+      aplicarTDE,
     });
   };
 
@@ -238,15 +240,27 @@ export default function Home() {
                     />
                   </div>
                 </div>
-                <div className="flex items-center space-x-2">
-                  <Checkbox
-                    id="produtoQuimico"
-                    checked={produtoQuimico}
-                    onCheckedChange={(checked) => setProdutoQuimico(checked as boolean)}
-                  />
-                  <Label htmlFor="produtoQuimico" className="cursor-pointer">
-                    Produto Químico
-                  </Label>
+                <div className="space-y-3">
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="produtoQuimico"
+                      checked={produtoQuimico}
+                      onCheckedChange={(checked) => setProdutoQuimico(checked as boolean)}
+                    />
+                    <Label htmlFor="produtoQuimico" className="cursor-pointer">
+                      Produto Químico
+                    </Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="aplicarTDE"
+                      checked={aplicarTDE}
+                      onCheckedChange={(checked) => setAplicarTDE(checked as boolean)}
+                    />
+                    <Label htmlFor="aplicarTDE" className="cursor-pointer">
+                      Aplicar TDE (Taxa de Dificuldade de Entrega)
+                    </Label>
+                  </div>
                 </div>
               </div>
 
@@ -279,15 +293,15 @@ export default function Home() {
               <CardContent className="pt-6">
                 <div className="space-y-3">
                   <div className="flex justify-between items-center py-2 border-b">
-                    <span className="text-gray-600 dark:text-gray-300">Frete Base:</span>
+                    <span className="text-gray-600 dark:text-gray-300">Frete Peso:</span>
                     <span className="font-semibold text-lg">
-                      R$ {calcularMutation.data.freteBase.toFixed(2)}
+                      R$ {calcularMutation.data.fretePeso.toFixed(2)}
                     </span>
                   </div>
                   <div className="flex justify-between items-center py-2 border-b">
-                    <span className="text-gray-600 dark:text-gray-300">Ad Valorem:</span>
+                    <span className="text-gray-600 dark:text-gray-300">Frete Valor (Ad Valorem):</span>
                     <span className="font-semibold text-lg">
-                      R$ {calcularMutation.data.adValorem.toFixed(2)}
+                      R$ {calcularMutation.data.freteValor.toFixed(2)}
                     </span>
                   </div>
                   <div className="flex justify-between items-center py-2 border-b">
@@ -296,7 +310,13 @@ export default function Home() {
                       R$ {calcularMutation.data.despacho.toFixed(2)}
                     </span>
                   </div>
-                  {produtoQuimico && (
+                  <div className="flex justify-between items-center py-2 border-b">
+                    <span className="text-gray-600 dark:text-gray-300">Pedágio:</span>
+                    <span className="font-semibold text-lg">
+                      R$ {calcularMutation.data.pedagio.toFixed(2)}
+                    </span>
+                  </div>
+                  {produtoQuimico && calcularMutation.data.produtoQuimico > 0 && (
                     <div className="flex justify-between items-center py-2 border-b">
                       <span className="text-gray-600 dark:text-gray-300">Produto Químico:</span>
                       <span className="font-semibold text-lg">
@@ -304,18 +324,22 @@ export default function Home() {
                       </span>
                     </div>
                   )}
-                  <div className="flex justify-between items-center py-2 border-b">
-                    <span className="text-gray-600 dark:text-gray-300">TDE 1:</span>
-                    <span className="font-semibold text-lg">
-                      R$ {calcularMutation.data.tde1.toFixed(2)}
-                    </span>
-                  </div>
-                  <div className="flex justify-between items-center py-2 border-b">
-                    <span className="text-gray-600 dark:text-gray-300">TDE 2:</span>
-                    <span className="font-semibold text-lg">
-                      R$ {calcularMutation.data.tde2.toFixed(2)}
-                    </span>
-                  </div>
+                  {calcularMutation.data.tde1 > 0 && (
+                    <div className="flex justify-between items-center py-2 border-b">
+                      <span className="text-gray-600 dark:text-gray-300">TDE 1:</span>
+                      <span className="font-semibold text-lg">
+                        R$ {calcularMutation.data.tde1.toFixed(2)}
+                      </span>
+                    </div>
+                  )}
+                  {calcularMutation.data.tde2 > 0 && (
+                    <div className="flex justify-between items-center py-2 border-b">
+                      <span className="text-gray-600 dark:text-gray-300">TDE 2:</span>
+                      <span className="font-semibold text-lg">
+                        R$ {calcularMutation.data.tde2.toFixed(2)}
+                      </span>
+                    </div>
+                  )}
                   <div className="flex justify-between items-center py-4 border-t-2 border-blue-300 dark:border-blue-700 mt-4">
                     <span className="text-xl font-bold text-gray-900 dark:text-white">Total:</span>
                     <span className="text-3xl font-bold text-blue-600 dark:text-blue-400">

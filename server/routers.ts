@@ -52,6 +52,7 @@ export const appRouter = router({
           peso: z.number().positive(),
           valorMercadoria: z.number().nonnegative(),
           produtoQuimico: z.boolean().default(false),
+          aplicarTDE: z.boolean().default(false),
         })
       )
       .mutation(async ({ input }) => {
@@ -63,6 +64,7 @@ export const appRouter = router({
           peso,
           valorMercadoria,
           produtoQuimico,
+          aplicarTDE,
         } = input;
 
         // Buscar a tabela de frete
@@ -77,58 +79,73 @@ export const appRouter = router({
           throw new Error("Rota de frete não encontrada");
         }
 
-        // Calcular o frete base por peso
-        let freteBase = 0;
+        // Divisor de ICMS (12% = 1 - 0.12 = 0.88)
+        const ICMS_DIVISOR = 0.88;
+
+        // Calcular o frete base por peso (em centavos)
+        let fretePesoBase = 0;
         if (peso <= 10) {
-          freteBase = tabela.peso0a10;
+          fretePesoBase = tabela.peso0a10;
         } else if (peso <= 20) {
-          freteBase = tabela.peso11a20;
+          fretePesoBase = tabela.peso11a20;
         } else if (peso <= 30) {
-          freteBase = tabela.peso21a30;
+          fretePesoBase = tabela.peso21a30;
         } else if (peso <= 50) {
-          freteBase = tabela.peso31a50;
+          fretePesoBase = tabela.peso31a50;
         } else if (peso <= 70) {
-          freteBase = tabela.peso51a70;
+          fretePesoBase = tabela.peso51a70;
         } else if (peso <= 100) {
-          freteBase = tabela.peso71a100;
+          fretePesoBase = tabela.peso71a100;
         } else if (peso <= 200) {
-          freteBase = tabela.peso101a200 * peso;
+          fretePesoBase = tabela.peso101a200 * peso;
         } else {
-          freteBase = tabela.pesoAcima200 * peso;
+          fretePesoBase = tabela.pesoAcima200 * peso;
         }
 
-        // Calcular Ad Valorem
-        const adValoremCalc = (valorMercadoria * tabela.adValoremPerc) / 1000;
-        const adValorem = Math.max(adValoremCalc, tabela.adValoremMin);
+        // Aplicar ICMS no Frete Peso
+        const fretePeso = fretePesoBase / ICMS_DIVISOR;
+
+        // Calcular Ad Valorem (Frete Valor)
+        // adValoremPerc está em décimos de milésimos (ex: 35 = 0.0035 = 0.35%)
+        const adValoremCalc = (valorMercadoria * 100 * tabela.adValoremPerc) / 10000; // valorMercadoria em centavos
+        const adValoremBase = Math.max(adValoremCalc, tabela.adValoremMin);
+        const adValorem = adValoremBase / ICMS_DIVISOR;
 
         // Calcular Despacho
-        const despacho = tabela.despacho;
+        const despacho = tabela.despacho / ICMS_DIVISOR;
 
-        // Calcular Produto Químico (se aplicável)
+        // Calcular Pedágio (usando os campos de prodQuimico da tabela)
+        const pedagioBase = peso <= 100 ? tabela.prodQuimicoAte100 : tabela.prodQuimicoAcima100;
+        const pedagio = (pedagioBase * peso) / ICMS_DIVISOR;
+
+        // Calcular Produto Químico (se aplicável) - NÃO dividir por ICMS
         let produtoQuimicoValor = 0;
         if (produtoQuimico) {
-          const prodQuimicoBase = peso <= 100 ? tabela.prodQuimicoAte100 : tabela.prodQuimicoAcima100;
           produtoQuimicoValor = Math.max(
-            (freteBase * tabela.prodQuimicoPerc) / 100,
-            prodQuimicoBase
+            (fretePesoBase * tabela.prodQuimicoPerc) / 100,
+            pedagioBase
           );
         }
 
-        // Calcular TDE 1
-        const tde1Calc = (freteBase * tabela.tde1Perc) / 100;
-        const tde1 = Math.min(Math.max(tde1Calc, tabela.tde1Min), tabela.tde1Max);
+        // Calcular TDE (se aplicável) - NÃO dividir por ICMS
+        let tde1 = 0;
+        let tde2 = 0;
+        if (aplicarTDE) {
+          const tde1Calc = (fretePesoBase * tabela.tde1Perc) / 100;
+          tde1 = Math.min(Math.max(tde1Calc, tabela.tde1Min), tabela.tde1Max);
 
-        // Calcular TDE 2
-        const tde2Calc = (freteBase * tabela.tde2Perc) / 100;
-        const tde2 = Math.max(tde2Calc, tabela.tde2Min);
+          const tde2Calc = (fretePesoBase * tabela.tde2Perc) / 100;
+          tde2 = Math.max(tde2Calc, tabela.tde2Min);
+        }
 
         // Calcular total
-        const total = freteBase + adValorem + despacho + produtoQuimicoValor + tde1 + tde2;
+        const total = fretePeso + adValorem + despacho + pedagio + produtoQuimicoValor + tde1 + tde2;
 
         return {
-          freteBase: freteBase / 100,
-          adValorem: adValorem / 100,
+          fretePeso: fretePeso / 100,
+          freteValor: adValorem / 100,
           despacho: despacho / 100,
+          pedagio: pedagio / 100,
           produtoQuimico: produtoQuimicoValor / 100,
           tde1: tde1 / 100,
           tde2: tde2 / 100,

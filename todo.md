@@ -9,4 +9,12 @@
 - [x] Criar interface para exibir resultado detalhado do cálculo
 - [x] Adicionar validação de dados de entrada
 - [x] Testar cálculo de frete com diferentes cenários
-- [ ] Criar checkpoint final do projeto
+- [x] Criar checkpoint final do projeto
+
+## Correções Necessárias
+- [x] Aplicar divisor de ICMS (0,88) no cálculo de cada componente
+- [x] Remover cobrança automática de TDE1 e TDE2
+- [x] Adicionar campo opcional para TDE na interface
+- [x] Renomear campos para usar a nomenclatura correta (Frete Peso, Frete Valor, Pedágio)
+- [x] Atualizar testes para validar o cálculo com ICMS
+- [x] Validar cálculo com o exemplo fornecido (R$ 440,01)

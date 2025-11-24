@@ -47,7 +47,7 @@ export const freteTabela = mysqlTable("frete_tabela", {
   pesoAcima200: int("peso_acima_200").notNull(), // em centavos por kg
   
   // Taxas adicionais
-  adValoremPerc: int("ad_valorem_perc").notNull(), // em milésimos (ex: 35 = 0.0035 = 0.35%)
+  adValoremPerc: int("ad_valorem_perc").notNull(), // em décimos de milésimos (ex: 35 = 0.0035 = 0.35%)
   adValoremMin: int("ad_valorem_min").notNull(), // em centavos
   despacho: int("despacho").notNull(), // em centavos
   prodQuimicoPerc: int("prod_quimico_perc").notNull(), // em centésimos (ex: 25 = 0.25 = 25%)

@@ -1,0 +1,38 @@
+{
+  "query": "SELECT * FROM frete_tabela WHERE uf_origem = 'MG' AND classificacao_origem = 'METROPOLITANA' AND uf_destino = 'SP' AND classificacao_destino = 'CAPITAL' LIMIT 1;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 4G4UEAZakkSA9vz.root --database BF6xJUsRXHRMSnq9GCvbQT --execute SELECT * FROM frete_tabela WHERE uf_origem = 'MG' AND classificacao_origem = 'METROPOLITANA' AND uf_destino = 'SP' AND classificacao_destino = 'CAPITAL' LIMIT 1;",
+  "rows": [
+    {
+      "id": "81",
+      "uf_origem": "MG",
+      "classificacao_origem": "METROPOLITANA",
+      "uf_destino": "SP",
+      "classificacao_destino": "CAPITAL",
+      "peso_0_10": "2113",
+      "peso_11_20": "2777",
+      "peso_21_30": "3170",
+      "peso_31_50": "4226",
+      "peso_51_70": "5282",
+      "peso_71_100": "6762",
+      "peso_101_200": "60",
+      "peso_acima_200": "51",
+      "ad_valorem_perc": "4",
+      "ad_valorem_min": "350",
+      "despacho": "1856",
+      "prod_quimico_perc": "25",
+      "prod_quimico_ate_100": "219",
+      "prod_quimico_acima_100": "2",
+      "tde1_perc": "40",
+      "tde1_min": "20798",
+      "tde1_max": "97378",
+      "tde2_perc": "40",
+      "tde2_min": "49063",
+      "createdAt": "2025-11-24 17:58:30",
+      "updatedAt": "2025-11-24 17:58:30"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tuf_origem\tclassificacao_origem\tuf_destino\tclassificacao_destino\tpeso_0_10\tpeso_11_20\tpeso_21_30\tpeso_31_50\tpeso_51_70\tpeso_71_100\tpeso_101_200\tpeso_acima_200\tad_valorem_perc\tad_valorem_min\tdespacho\tprod_quimico_perc\tprod_quimico_ate_100\tprod_quimico_acima_100\ttde1_perc\ttde1_min\ttde1_max\ttde2_perc\ttde2_min\tcreatedAt\tupdatedAt\n81\tMG\tMETROPOLITANA\tSP\tCAPITAL\t2113\t2777\t3170\t4226\t5282\t6762\t60\t51\t4\t350\t1856\t25\t219\t2\t40\t20798\t97378\t40\t49063\t2025-11-24 17:58:30\t2025-11-24 17:58:30\n",
+  "stderr": "",
+  "execution_time_ms": 683
+}

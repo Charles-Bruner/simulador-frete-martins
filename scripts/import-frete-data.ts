@@ -34,8 +34,9 @@ async function importFreteData() {
     // Converter valores monetários para centavos
     const toCents = (value: number) => Math.round(value * 100);
     
-    // Converter percentuais para milésimos ou centésimos
-    const toThousandths = (value: number) => Math.round(value * 1000);
+    // Converter percentuais (sem arredondamento para preservar precisão)
+    // adValoremPerc: multiplicar por 10000 para armazenar 0.0035 como 35
+    const toTenThousandths = (value: number) => Math.round(value * 10000);
     const toHundredths = (value: number) => Math.round(value * 100);
     
     return {
@@ -51,7 +52,7 @@ async function importFreteData() {
       peso71a100: toCents(Number(row[9] || 0)),
       peso101a200: toCents(Number(row[10] || 0)),
       pesoAcima200: toCents(Number(row[11] || 0)),
-      adValoremPerc: toThousandths(Number(row[12] || 0)),
+      adValoremPerc: toTenThousandths(Number(row[12] || 0)),
       adValoremMin: toCents(Number(row[13] || 0)),
       despacho: toCents(Number(row[14] || 0)),
       prodQuimicoPerc: toHundredths(Number(row[15] || 0)),
