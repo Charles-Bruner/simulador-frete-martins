@@ -1,5 +1,6 @@
+// client/src/main.tsx
 import { trpc } from "@/lib/trpc";
-import { UNAUTHED_ERR_MSG } from '@shared/const';
+import { UNAUTHED_ERR_MSG } from "@shared/const";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { httpBatchLink, TRPCClientError } from "@trpc/client";
 import { createRoot } from "react-dom/client";
@@ -21,7 +22,7 @@ const redirectToLoginIfUnauthorized = (error: unknown) => {
   window.location.href = getLoginUrl();
 };
 
-queryClient.getQueryCache().subscribe(event => {
+queryClient.getQueryCache().subscribe((event) => {
   if (event.type === "updated" && event.action.type === "error") {
     const error = event.query.state.error;
     redirectToLoginIfUnauthorized(error);
@@ -29,7 +30,7 @@ queryClient.getQueryCache().subscribe(event => {
   }
 });
 
-queryClient.getMutationCache().subscribe(event => {
+queryClient.getMutationCache().subscribe((event) => {
   if (event.type === "updated" && event.action.type === "error") {
     const error = event.mutation.state.error;
     redirectToLoginIfUnauthorized(error);
@@ -37,10 +38,19 @@ queryClient.getMutationCache().subscribe(event => {
   }
 });
 
+/**
+ * URL base da API:
+ * - Em produção (Vercel): vem de VITE_API_BASE_URL (URL do Railway)
+ * - Em desenvolvimento: se não houver VITE_API_BASE_URL, usa http://localhost:3000
+ */
+const apiBaseUrl =
+  import.meta.env.VITE_API_BASE_URL ||
+  (import.meta.env.DEV ? "http://localhost:3000" : "");
+
 const trpcClient = trpc.createClient({
   links: [
     httpBatchLink({
-      url: "/api/trpc",
+      url: `${apiBaseUrl}/api/trpc`,
       transformer: superjson,
       fetch(input, init) {
         return globalThis.fetch(input, {
